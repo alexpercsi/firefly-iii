@@ -471,7 +471,7 @@ class CreateRecurringTransactions implements ShouldQueue
         $startDate = $this->getStartDate($recurrence);
         $cutoffDate = $this->date;
         $cutoffDate = date_modify("+60 day", $cutoffDate);
-        return $startDate->gt($this->date);
+        return $startDate->gt($cutoffDate);
     }
 
     /**

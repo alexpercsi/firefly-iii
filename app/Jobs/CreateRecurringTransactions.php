@@ -22,7 +22,6 @@
 
 declare(strict_types=1);
 
-
 /**
  * CreateRecurringTransactions.php
  * Copyright (c) 2018 thegrumpydictator@gmail.com
@@ -321,8 +320,8 @@ class CreateRecurringTransactions implements ShouldQueue
         /** @var Carbon $date */
         foreach ($occurrences as $date) {
             Log::debug(sprintf('Now at date %s.', $date->format('Y-m-d')));
-            if ($date->ne($this->date)) {
-                Log::debug(sprintf('%s is not not today (%s)', $date->format('Y-m-d'), $this->date->format('Y-m-d')));
+            if (false == isLessThan60DaysInTheFuture($recurrence)) {
+                Log::debug(sprintf('%s is out of range (%s)', $date->format('Y-m-d'), $this->date->format('Y-m-d')));
 
                 continue;
             }
@@ -335,6 +334,12 @@ class CreateRecurringTransactions implements ShouldQueue
                 continue;
             }
 
+            // date of next occurrence is different than date of last occurrence (i.e. this recurrence has already been processed)
+            if ($recurrence->latest_date->eq($date)) {
+                Log::info(sprintf('Already processed this recurrence'));
+            }
+
+  
             // create transaction array and send to factory.
             $array   = [
                 'type'            => $recurrence->transactionType->type,
@@ -409,7 +414,7 @@ class CreateRecurringTransactions implements ShouldQueue
             // start looping from $startDate to today perhaps we have a hit?
             // add two days to $this->date so we always include the weekend.
             $includeWeekend = clone $this->date;
-            $includeWeekend->addDays(2);
+            $includeWeekend->addDays(60);
             $occurrences = $this->repository->getOccurrencesInRange($repetition, $recurrence->first_date, $includeWeekend);
             Log::debug(
                 sprintf(
@@ -451,6 +456,21 @@ class CreateRecurringTransactions implements ShouldQueue
     {
         $startDate = $this->getStartDate($recurrence);
 
+        return $startDate->gt($this->date);
+    }
+
+    /**
+     * Is the recurrence less than 60 days in the future
+     *
+     * @param $recurrence
+     *
+     * @return bool
+     */
+    private function isLessThan60DaysInTheFuture(Recurrence $recurrence): bool
+    {
+        $startDate = $this->getStartDate($recurrence);
+        $cutoffDate = $this->date;
+        $cutoffDate = date_modify("+60 day", $cutoffDate);
         return $startDate->gt($this->date);
     }
 
@@ -507,8 +527,8 @@ class CreateRecurringTransactions implements ShouldQueue
             return false;
         }
 
-        // first_date is in the future
-        if ($this->hasNotStartedYet($recurrence)) {
+        // first_date is less than 60 days in the future
+        if ($this->isLessThan60DaysInTheFuture($recurrence)) {
             Log::info(
                 sprintf(
                     'Recurrence #%d is set to run on %s, and today\'s date is %s. Skipped.',

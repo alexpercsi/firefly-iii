@@ -469,8 +469,8 @@ class CreateRecurringTransactions implements ShouldQueue
     private function isLessThan60DaysInTheFuture(Recurrence $recurrence): bool
     {
         $startDate = $this->getStartDate($recurrence);
-        $cutoffDate = $this->date;
-        $cutoffDate = date_modify("+60 day", $cutoffDate);
+        $cutoffDate = clone $this->date;
+        $cutoffDate = $cutoffDate->modify("+60 day");
         return $startDate->gt($cutoffDate);
     }
 

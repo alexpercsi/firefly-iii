@@ -320,7 +320,7 @@ class CreateRecurringTransactions implements ShouldQueue
         /** @var Carbon $date */
         foreach ($occurrences as $date) {
             Log::debug(sprintf('Now at date %s.', $date->format('Y-m-d')));
-            if (false == isLessThan60DaysInTheFuture($recurrence)) {
+            if (false == this->isLessThan60DaysInTheFuture($recurrence)) {
                 Log::debug(sprintf('%s is out of range (%s)', $date->format('Y-m-d'), $this->date->format('Y-m-d')));
 
                 continue;

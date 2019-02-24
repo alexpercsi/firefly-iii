@@ -44,6 +44,8 @@ RUN chown -R www-data:www-data /var/www && \
     locale-gen && \
     composer install --prefer-dist --no-dev --no-scripts --no-suggest
 
+COPY /var/www/firefly-iii/public/* /var/www/html/ -r
+
 # Expose port 80
 EXPOSE 80
 

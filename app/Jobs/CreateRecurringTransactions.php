@@ -335,7 +335,7 @@ class CreateRecurringTransactions implements ShouldQueue
             }
 
             // date of next occurrence is different than date of last occurrence (i.e. this recurrence has already been processed)
-            if ($recurrence->latest_date->eq($date)) {
+            if ($date->eq($recurrence->latest_date)) {
                 Log::info(sprintf('Already processed this recurrence'));
             }
 

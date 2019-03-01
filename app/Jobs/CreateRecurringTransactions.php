@@ -471,7 +471,7 @@ class CreateRecurringTransactions implements ShouldQueue
         $startDate = $this->getStartDate($recurrence);
         $cutoffDate = clone $this->date;
         $cutoffDate = $cutoffDate->modify("+60 day");
-        return $startDate->gt($cutoffDate);
+        return $cutoffDate->gt($startDate);
     }
 
     /**
@@ -528,7 +528,7 @@ class CreateRecurringTransactions implements ShouldQueue
         }
 
         // first_date is less than 60 days in the future
-        if (!$this->isLessThan60DaysInTheFuture($recurrence)) {
+        if ($this->isLessThan60DaysInTheFuture($recurrence)==false) {
             Log::info(
                 sprintf(
                     'Recurrence #%d is set to run on %s, and today\'s date is %s. Skipped.',
